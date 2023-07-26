@@ -23,47 +23,32 @@ app.get('/auth/google', (req, res) => {
 
     const authorizationUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: ['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        scope: ['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/userinfo.email','https://www.googleapis.com/auth/drive.metadata.readonly'],
       });
 
-    res.redirect(authorizationUrl);
+    res.send(authorizationUrl);
 });
 
-app.get('/oauth2callback', async (req,res) => {
+app.get('/report', async (req,res) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+    // const d = await drive.files.list({auth: oauth2Client,
+    //     pageSize: 10,
+    //     fields: 'nextPageToken, files(id, name)'});
+    // console.log(d);
     fs.writeFileSync("creds.json", JSON.stringify(tokens));
     res.send('done');
 });
 
-// app.get('/drive', (req, res) => {
-// //drive logic
-// try{
-//     const creds = fs.readFileSync("creds.json");
-
-// oauth2Client.setCredentials(JSON.parse(creds));
-
-// drive.files.list({auth: oauth2Client,pageSize: 10,fields: 'nextPageToken, files(id, name)',}, (err1, res1) => {
-//     if (err1) return console.log('The API returned an error: ' + err1);
-//     console.log("here");
-//     const files = res1.data.files;
-//     if (files.length) {
-//       console.log('Files:');
-//       files.map((file) => {
-//         console.log(`${file.name} (${file.id})`);
-//       });
-//     } else {
-//       console.log('No files found.');
-//     }
-//   });
-//   res.send("done");
-
-// } catch (err){
-//     console.log(err);
-// }
-
-// })
+app.get('/drive', async (req, res) => {
+    const tokens = fs.readFileSync("creds.json");
+    const token = JSON.parse(tokens);
+    oauth2Client.setCredentials(token);
+    const d = await drive.files.list({auth: oauth2Client,
+        fields: 'nextPageToken, files(fileExtension, shared, webViewLink, size, id, name, ownedByMe, capabilities, permissions)'});
+    res.send(d.data.files);
+})
 
 
 app.listen(3000);
