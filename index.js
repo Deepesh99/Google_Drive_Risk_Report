@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 
-const { report } = require('./routes/report');
+const report  = require('./routes/report');
 
 const app = express()
 

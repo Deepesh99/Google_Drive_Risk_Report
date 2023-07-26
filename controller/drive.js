@@ -19,7 +19,7 @@ exports.auth1 = (req, res) => {
     res.send(authorizationUrl);
 }
 
-exports.auth2 = async (req,res) => {
+exports.auth2 = async (req, res) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
