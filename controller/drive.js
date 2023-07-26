@@ -35,3 +35,11 @@ exports.analytics = async (req, res) => {
         fields: 'nextPageToken, files(fileExtension, shared, webViewLink, size, id, name, ownedByMe, capabilities, permissions)'});
     res.send(d.data.files);
 }
+
+exports.revoke = (req,res) => {
+    const creds = fs.readFileSync("creds.json");
+    const tokens = JSON.parse(creds);
+    const token = tokens.access_token
+    oauth2Client.revokeToken(token);
+    res.send("access revoked!!")
+}
