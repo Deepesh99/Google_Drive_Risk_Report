@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fs = require('fs');
+// const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
 const UserAuth = require('../model/userauth');
@@ -31,7 +31,7 @@ exports.auth2 = async (req, res) => {
 
         const user = await UserAuth.findOne({ where: { email: userEmail } });
 
-        if(!user) {
+        if(!user ) {
             await UserAuth.create({
                 email: userEmail,
                 authCred: JSON.stringify(tokens)
@@ -42,8 +42,11 @@ exports.auth2 = async (req, res) => {
                 {where: {email: user.email}}
             );
         };
-        // req.setHeader( {email: userEmail});
-        res.send("Authentication Completed");
+        
+        //req.setHeaders('email', user.email);
+        // res.headers('email', `${user.email}`);
+        // res.redirect('drive');
+        res.send("authentication done");
 
         // console.log(userEmail);
         // oauth2Client.setCredentials(tokens);
@@ -60,13 +63,105 @@ exports.analytics = async (req, res) => {
     try {
         const { email } = req.headers;
         const user = await UserAuth.findOne({ where: { email } });
+        if(!user) throw "User not registered";
         const token = JSON.parse(user.authCred);
         oauth2Client.setCredentials(token);
         const d = await drive.files.list({auth: oauth2Client,
-            fields: 'nextPageToken, files(fileExtension, shared, webViewLink, size, id, name, ownedByMe, capabilities, permissions)'});
-        res.send(d.data.files);
+            fields: 'nextPageToken, files(shared, webViewLink, id, name, owners, permissions)'
+        });
+
+        files = d.data.files
+        let publicFiles = [];
+        let peopleWithAccess = new Set();
+        let sharedExternally = [];
+
+    
+  
+    let riskScore = 0;
+    files.forEach((file) => {
+      const permissions = file.permissions;
+      const owners = file.owners;      
+      let creators = [];
+      if(typeof(owners) === "object"){
+          owners.forEach((owner) => {
+
+                const owners = {
+                    name: owner.displayName,
+                    email: owner.emailAddress
+                }
+                creators.push(owners)
+          })  
+      }
+
+      let sharedWith = [];
+      if(typeof(permissions) === 'object'){
+          permissions.forEach((permission) => {
+
+            if(permission.displayName && permission.emailAddress){
+                const share = {
+                    name: permission.displayName,
+                    email: permission.emailAddress
+                }
+                sharedWith.push(share);
+            }
+          })
+      }
+       if (permissions && permissions.length > 0) {
+        permissions.forEach((permission) => {
+            if(permission.type === 'anyone' && permission.role === 'reader'){
+                const newFile = {
+                    type: "Public File",
+                    fileName: file.name,
+                    webViewLink: file.webViewLink,
+                    accessSetting: "Anyone with Link",
+                    sharedWith: sharedWith,
+                    createdBy: creators,    
+                }
+                
+                publicFiles.push(newFile);
+                riskScore += 5;
+            }
+            else if(permission.type === 'domain' || (permission.type === 'user' && permission.emailAddress != email && permission.role === 'writer')){
+                const newFile = {
+                    type: "Externally Shared",
+                    fileName: file.name,
+                    webViewLink: file.webViewLink,
+                    accessSetting: "Files shared Externally",
+                    sharedWith: sharedWith,
+                    createdBy: creators,    
+                }
+                
+                sharedExternally.push(newFile);
+                peopleWithAccess.add(permission.emailAddress);
+                riskScore += 3;
+            }
+        });
+      }
+    });
+
+    let ownedByMe = []
+    sharedExternally.forEach((file) => {
+        if(file.createdBy[0].email === email) {
+            ownedByMe.push(file);
+        }
+    })
+
+    let result = []
+    result.push({sharedExternally: sharedExternally.length});
+    result.push({publicFiles: publicFiles.length});
+    result.push({peopleWithAccess: peopleWithAccess.size});
+
+    riskScore = riskScore - sharedExternally.length + ownedByMe.length;
+
+
+    result.push({riskScore});
+    result.push({PublicFiles: publicFiles});
+    result.push({sharedExternally: sharedExternally});
+
+
+    res.json(result);
     } catch(err) {
-        res.send(err.errors[0].message);
+        res.send(err);
     }
     
 }
@@ -76,6 +171,7 @@ exports.revoke = async (req,res) => {
     try {
         const { email } = req.headers;
         const user = await UserAuth.findOne({ where: { email } });
+        if(!user) throw "User not registered";
         const tokens = JSON.parse(user.authCred);
         const token = tokens.access_token;
         oauth2Client.revokeToken(token);
