@@ -1,5 +1,4 @@
 require('dotenv').config();
-// const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
 const UserAuth = require('../model/userauth');
