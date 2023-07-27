@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
 const drive = google.drive('v3');
 
@@ -22,6 +23,9 @@ exports.auth1 = (req, res) => {
 exports.auth2 = async (req, res) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
+    const userInfo = jwt.decode(tokens.id_token, {complete: true});
+    const userEmail = userInfo.payload.email;
+    console.log(userEmail);
     oauth2Client.setCredentials(tokens);
     fs.writeFileSync("creds.json", JSON.stringify(tokens));
     res.send('done');
