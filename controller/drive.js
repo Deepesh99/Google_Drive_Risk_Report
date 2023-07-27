@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
+const UserAuth = require('../model/userauth');
 const drive = google.drive('v3');
 
 const oauth2Client = new google.auth.OAuth2(
@@ -21,29 +22,66 @@ exports.auth1 = (req, res) => {
 }
 
 exports.auth2 = async (req, res) => {
-    const { code } = req.query;
-    const { tokens } = await oauth2Client.getToken(code);
-    const userInfo = jwt.decode(tokens.id_token, {complete: true});
-    const userEmail = userInfo.payload.email;
-    console.log(userEmail);
-    oauth2Client.setCredentials(tokens);
-    fs.writeFileSync("creds.json", JSON.stringify(tokens));
-    res.send('done');
+
+    try {
+        const { code } = req.query;
+        const { tokens } = await oauth2Client.getToken(code);
+        const userInfo = jwt.decode(tokens.id_token, {complete: true});
+        const userEmail = userInfo.payload.email;
+
+        const user = await UserAuth.findOne({ where: { email: userEmail } });
+
+        if(!user) {
+            await UserAuth.create({
+                email: userEmail,
+                authCred: JSON.stringify(tokens)
+            })
+        } else {
+            await UserAuth.update(
+                {authCred: JSON.stringify(tokens)},
+                {where: {email: user.email}}
+            );
+        };
+        // req.setHeader( {email: userEmail});
+        res.send("Authentication Completed");
+
+        // console.log(userEmail);
+        // oauth2Client.setCredentials(tokens);
+        // fs.writeFileSync("creds.json", JSON.stringify(tokens));
+        // res.send('done');
+    } catch (err) {
+        console.log(err);
+    }
+    
 }
 
 exports.analytics = async (req, res) => {
-    const tokens = fs.readFileSync("creds.json");
-    const token = JSON.parse(tokens);
-    oauth2Client.setCredentials(token);
-    const d = await drive.files.list({auth: oauth2Client,
-        fields: 'nextPageToken, files(fileExtension, shared, webViewLink, size, id, name, ownedByMe, capabilities, permissions)'});
-    res.send(d.data.files);
+    
+    try {
+        const { email } = req.headers;
+        const user = await UserAuth.findOne({ where: { email } });
+        const token = JSON.parse(user.authCred);
+        oauth2Client.setCredentials(token);
+        const d = await drive.files.list({auth: oauth2Client,
+            fields: 'nextPageToken, files(fileExtension, shared, webViewLink, size, id, name, ownedByMe, capabilities, permissions)'});
+        res.send(d.data.files);
+    } catch(err) {
+        res.send(err.errors[0].message);
+    }
+    
 }
 
-exports.revoke = (req,res) => {
-    const creds = fs.readFileSync("creds.json");
-    const tokens = JSON.parse(creds);
-    const token = tokens.access_token
-    oauth2Client.revokeToken(token);
-    res.send("access revoked!!")
+exports.revoke = async (req,res) => {
+
+    try {
+        const { email } = req.headers;
+        const user = await UserAuth.findOne({ where: { email } });
+        const tokens = JSON.parse(user.authCred);
+        const token = tokens.access_token;
+        oauth2Client.revokeToken(token);
+        res.send("access revoked!!");
+    } catch(err) {
+        res.send(err);
+    }
+    
 }
