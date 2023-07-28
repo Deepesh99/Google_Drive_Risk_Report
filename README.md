@@ -14,6 +14,9 @@
 - Run 'npm run dev' or 'num start'
 
 ## Database setup
+- In MySQL workbench create a schema 
+
+- Insert Schema name, username and password in env file
 
 ## Routing
 - To authenticate and authorize: `GET http://localhost:3000/auth/google` will return a link which is for the google Oauth2 consent page. Paste the link in browser and complete the sign in
