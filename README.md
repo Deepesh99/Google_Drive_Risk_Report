@@ -1,19 +1,27 @@
+
 # jarviot-challenge-full-stack-backend
 
-Setup
- Download .zip folder
- open the folder in vscode
- run 'npm i' in terminal
- create .env file with below details
+## Setup
+- Download .zip folder
 
-Start the app
- run 'npm run dev' or 'num start'
+- Open the folder in vscode
 
-Database setup
+- Run 'npm i' in terminal
 
-Routing
- To authenticate and authorize: GET http://localhost:3000/auth/google will return a link which is for the google Oauth2 consent page.
-  paste the link in browser and complete the sign in
- To get the analytics: GET localhost:3000/drive and set headers where key=email and value=useremail
- To revoke access: GET localhost:3000/revoke and set headers where key=email and value=useremail
- 
+- Create .env file with below details
+
+## Start the app
+- Run 'npm run dev' or 'num start'
+
+## Database setup
+
+## Routing
+- To authenticate and authorize: `GET http://localhost:3000/auth/google` will return a link which is for the google Oauth2 consent page. Paste the link in browser and complete the sign in
+![2](https://github.com/Deepesh99/media/blob/main/drive-app/auth1.JPG?raw=true)
+![3](https://github.com/Deepesh99/media/blob/main/drive-app/auth2.JPG?raw=true)
+
+- To get the analytics: `GET http://localhost:3000/drive` and set headers where key=email and value=useremail
+![1](https://github.com/Deepesh99/media/blob/main/drive-app/result.JPG?raw=true) 
+
+- To revoke access: `GET http://localhost:3000/revoke` and set headers where key=email and value=useremail
+![4](https://github.com/Deepesh99/media/blob/main/drive-app/revoke.JPG?raw=true)
