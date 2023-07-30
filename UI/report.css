@@ -1,0 +1,62 @@
+* {
+    /* border: 1px solid black; */
+    font-family: 'Inter', sans-serif;
+    font-family: 'Open Sans', sans-serif;
+}
+.report {
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
+    
+}
+
+.overview {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.number {
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+text-align: center;
+}
+
+table {
+    border-spacing: 0;
+}
+
+td,th {
+    text-align: center;
+    border: 1px solid black;
+    padding: 10px;
+    border-spacing: 0;    
+}
+
+.public-files {
+    border: 1px solid rgb(184, 182, 182);
+    padding: 15px;
+    border-radius: 5px;
+    height: 60px;
+    width: 200px;}
+
+.people-with-access {
+    border: 1px solid rgb(184, 182, 182);
+    padding: 15px;
+    border-radius: 5px;
+    margin-left: 15px;
+    height: 60px;
+    width: 200px;
+}
+
+.shared-external {
+    border: 1px solid rgb(184, 182, 182);
+    padding: 15px;
+    border-radius: 5px;
+    margin-left: 15px;
+    height: 60px;
+    width: 200px;
+}

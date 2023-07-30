@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="report.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="report">
+        <form action="" method="get">
+            <label for="email">Email</label>
+            <input type="email" id="email">
+        </form>
+        <button>Get Report</button>
+        <button>Revoke</button>
+        <div class="overview">
+            <h1>Google Drive Risk Report</h1>
+            <div class="risk-score">
+                <p class="risk-score-value"></p>
+                <p>Risk Score</p>
+            </div>
+            
+        </div>
+        <hr/>
+        <div class="number">
+            <div class="public-files">
+                <p class="public-files-value"></p>
+                <p>Public Files</p>
+            </div>
+            <div class="people-with-access">
+                <p class="people-with-access-value"></p>
+                <p>People with access</p>
+            </div>
+            <div class="shared-external">
+                <p class="shared-external-value"></p>
+                <p>Files shared externally</p>
+            </div>
+        </div>
+        <hr/>
+        <div class="public-access-list">
+            <h2>Public files with access to everyone</h2>
+            <div class="public-access-list-value"></div>
+        </div>
+        <hr/>
+        <div class="shared-external-list">
+            <h2>Files Shared Externally</h2>
+            <div class="shared-external-list-value"></div>
+        </div>
+    </div>
+    <script src="report.js"></script>
+</body>
+</html>
